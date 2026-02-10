@@ -242,6 +242,13 @@ function crearGrafico(datosAnuales, edadJubilacion) {
             x: 0.5,
             xanchor: 'center'
         },
+        margin: {
+            l: 50,
+            r: 30,
+            t: 80,
+            b: 80
+        },
+        autosize: true,
         shapes: [
             {
                 type: 'line',
@@ -483,6 +490,14 @@ window.addEventListener('load', () => {
     
     // Calcular proyección inicial
     setTimeout(calcular, 500);
+
+    // Añadir listener para resize del gráfico
+    window.addEventListener('resize', () => {
+        const chartDiv = document.getElementById('chart');
+        if (chartDiv && chartDiv.offsetParent !== null) {
+            Plotly.Plots.resize(chartDiv);
+        }
+    });
 });
 
 // Recalcular cuando cambian los inputs (con debounce)

@@ -30,6 +30,14 @@
     box-sizing: border-box;
 }
 
+html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    position: relative;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-dark);
@@ -40,8 +48,10 @@ body {
 
 .container {
     max-width: 1600px;
+    width: 100%;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 2rem 1.5rem; /* Slightly reduced horizontal padding */
+    overflow-x: hidden;
 }
 
 header {
@@ -54,7 +64,7 @@ header {
 }
 
 header h1 {
-    font-size: 3rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 800;
     margin-bottom: 0.5rem;
     background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
@@ -71,7 +81,7 @@ header h1 {
 
 .main-content {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 400px minmax(0, 1fr);
     gap: 2rem;
     align-items: start;
 }
@@ -411,7 +421,9 @@ header h1 {
 
 #chart {
     min-height: 500px;
+    width: 100%;
     border-radius: 8px;
+    overflow: hidden;
 }
 
 /* Table Container */
@@ -537,8 +549,13 @@ tbody td.retirement-phase {
 
 .methodology-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 2rem;
+}
+@media (max-width: 600px) {
+    .methodology-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .method-box {
@@ -624,7 +641,11 @@ tbody td.retirement-phase {
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (max-width: 1300px) {
+    .container {
+        padding: 1.5rem 1rem;
+    }
+
     .main-content {
         grid-template-columns: 1fr;
     }
