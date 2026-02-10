@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Planner Pro - Planificación Financiera Inteligente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Retirement Planner Pro</h1>
+            <p class="subtitle">Simulación avanzada de jubilación con doble capital</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Panel de Inputs -->
+            <div class="input-panel">
+                <section class="input-section">
+                    <h2>📊 Datos Personales</h2>
+                    <div class="input-group">
+                        <label for="edad_actual">Edad Actual</label>
+                        <input type="range" id="edad_actual" min="18" max="70" value="30" oninput="updateValue(this)">
+                        <span class="value-display" id="edad_actual_value">30 años</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="edad_jubilacion">Edad de Jubilación</label>
+                        <input type="range" id="edad_jubilacion" min="50" max="80" value="65" oninput="updateValue(this)">
+                        <span class="value-display" id="edad_jubilacion_value">65 años</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="esperanza_vida">Esperanza de Vida</label>
+                        <input type="range" id="esperanza_vida" min="65" max="100" value="85" oninput="updateValue(this)">
+                        <span class="value-display" id="esperanza_vida_value">85 años</span>
+                    </div>
+                </section>
+
+                <section class="input-section">
+                    <h2>💵 Capital de Caja</h2>
+                    <div class="input-group">
+                        <label for="capital_inicial_caja">Capital Inicial</label>
+                        <input type="number" id="capital_inicial_caja" value="50000" step="1000" oninput="updateValue(this)">
+                        <span class="currency">USD</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="ingreso_mensual">Ingreso Mensual</label>
+                        <input type="number" id="ingreso_mensual" value="5000" step="100" oninput="updateValue(this)">
+                        <span class="currency">USD</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="gasto_mensual">Gasto Mensual Estimado</label>
+                        <input type="number" id="gasto_mensual" value="3000" step="100" oninput="updateValue(this)">
+                        <span class="currency">USD</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="tasa_retorno_caja_anual">Tasa de Retorno Anual (%)</label>
+                        <input type="range" id="tasa_retorno_caja_anual" min="0" max="15" value="3" step="0.5" oninput="updateValue(this)">
+                        <span class="value-display" id="tasa_retorno_caja_anual_value">3.0%</span>
+                    </div>
+                </section>
+
+                <section class="input-section">
+                    <h2>🏦 Reserva de Jubilación</h2>
+                    <div class="input-group">
+                        <label for="capital_inicial_reserva">Capital Inicial</label>
+                        <input type="number" id="capital_inicial_reserva" value="100000" step="1000" oninput="updateValue(this)">
+                        <span class="currency">USD</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="aporte_mensual_jubilacion">Aporte Mensual</label>
+                        <input type="number" id="aporte_mensual_jubilacion" value="1000" step="50" oninput="updateValue(this)">
+                        <span class="currency">USD</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="tasa_retorno_reserva_anual">Tasa de Retorno Anual (%)</label>
+                        <input type="range" id="tasa_retorno_reserva_anual" min="0" max="20" value="8" step="0.5" oninput="updateValue(this)">
+                        <span class="value-display" id="tasa_retorno_reserva_anual_value">8.0%</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="gasto_mensual_deseado">Gasto Mensual Deseado en Jubilación</label>
+                        <input type="number" id="gasto_mensual_deseado" value="3000" step="100" oninput="updateValue(this)">
+                        <span class="currency">USD</span>
+                    </div>
+                </section>
+
+                <section class="input-section">
+                    <h2>📈 Parámetros Económicos</h2>
+                    <div class="input-group">
+                        <label for="inflacion_anual">Inflación Anual Estimada (%)</label>
+                        <input type="range" id="inflacion_anual" min="0" max="10" value="3" step="0.5" oninput="updateValue(this)">
+                        <span class="value-display" id="inflacion_anual_value">3.0%</span>
+                    </div>
+                </section>
+
+                <button class="calculate-btn" onclick="calcular()">🚀 Calcular Proyección</button>
+                
+                <div class="utility-buttons">
+                    <button class="utility-btn" onclick="window.retirementPlanner.exportConfig()" title="Descargar configuración actual">
+                        💾 Exportar
+                    </button>
+                    <button class="utility-btn" onclick="document.getElementById('import-file').click()" title="Cargar configuración desde archivo">
+                        📂 Importar
+                    </button>
+                    <button class="utility-btn danger" onclick="if(confirm('¿Estás seguro de que quieres borrar la configuración guardada?')) { window.retirementPlanner.clearLocalStorage(); location.reload(); }" title="Borrar configuración guardada">
+                        🗑️ Limpiar
+                    </button>
+                </div>
+                
+                <input type="file" id="import-file" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+            </div>
+
+            <!-- Panel de Resultados -->
+            <div class="results-panel">
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Calculando tu futuro financiero...</p>
+                </div>
+
+                <div id="results" class="hidden">
+                    <!-- Indicador de Estado -->
+                    <div id="status-indicator" class="status-card">
+                        <div class="status-icon" id="status-icon">⏳</div>
+                        <h3 id="status-title">Analizando...</h3>
+                        <p id="status-message">Procesando datos...</p>
+                    </div>
+
+                    <!-- Métricas Principales -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Capital Total al Jubilarse</div>
+                            <div class="metric-value" id="capital_total_final">$0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Reserva de Jubilación</div>
+                            <div class="metric-value" id="capital_reserva_final">$0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Capital de Caja</div>
+                            <div class="metric-value" id="capital_caja_final">$0</div>
+                        </div>
+                        <div class="metric-card highlight">
+                            <div class="metric-label">Ingreso Mensual Perpetuo</div>
+                            <div class="metric-value" id="ingreso_perpetuo">$0</div>
+                            <div class="metric-subtitle">Sin agotar el capital</div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Evolución -->
+                    <div class="chart-container">
+                        <h3>📊 Evolución del Patrimonio</h3>
+                        <div id="chart"></div>
+                    </div>
+
+                    <!-- Tabla Año a Año -->
+                    <div class="table-container">
+                        <h3>📅 Evolución Año a Año</h3>
+                        <div class="table-wrapper">
+                            <table id="tabla-anual">
+                                <thead>
+                                    <tr>
+                                        <th>Año</th>
+                                        <th>Edad</th>
+                                        <th>Ingresos Trabajo</th>
+                                        <th>Gastos</th>
+                                        <th>Aportes</th>
+                                        <th>Flujo Neto</th>
+                                        <th>Rend. Caja</th>
+                                        <th>Rend. Reserva</th>
+                                        <th>Capital Caja</th>
+                                        <th>Reserva Jubilación</th>
+                                        <th>Capital Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-body">
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    <!-- Advertencia de Aportes Omitidos -->
+                    <div id="aportes-warning" class="warning-message hidden"></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nueva Sección: Metodología y Cálculos -->
+        <section class="methodology-section">
+            <div class="methodology-card">
+                <h2>🧮 Metodología y Cálculos Detallados</h2>
+                <p class="methodology-intro">Esta calculadora utiliza un modelo de simulación día a día para capturar el impacto real del interés compuesto y la inflación.</p>
+                
+                <div class="methodology-grid">
+                    <div class="method-box">
+                        <h3>1. Conversión de Tasas (TNA)</h3>
+                        <p>Las tasas ingresadas se consideran <strong>TNA (Tasa Nominal Anual)</strong>. El sistema obtiene la tasa diaria mediante división simple, lo cual es el estándar para tasas nominales:</p>
+                        <code class="formula">tasa_diaria = TNA / 100 / 365</code>
+                        <p class="extra">A diferencia de la TEA (Efectiva), la TNA no asume capitalización interna hasta que se aplica al saldo cada día.</p>
+                    </div>
+
+                    <div class="method-box">
+                        <h3>2. Fase de Acumulación</h3>
+                        <p>Cada día, el sistema ejecuta este orden de operaciones:</p>
+                        <ol>
+                            <li><strong>Rendimiento:</strong> Se aplica la tasa diaria al saldo.</li>
+                            <li><strong>Gastos:</strong> Se deduce el gasto diario ajustado por inflación.</li>
+                            <li><strong>Eventos Mensuales:</strong> Cada 30 días se procesan ingresos y aportes.</li>
+                        </ol>
+                    </div>
+
+                    <div class="method-box">
+                        <h3>3. Inflación "Gota a Gota"</h3>
+                        <p>La inflación se aplica de forma exponencial diaria, simulando una pérdida de poder adquisitivo constante:</p>
+                        <code class="formula">Multiplicador = (1 + tasa_diaria_inflacion) ^ dia</code>
+                        <p class="extra">Esto significa que un gasto de $2.000 mañana será sutilmente más caro que hoy, acumulando el efecto total al final del año.</p>
+                    </div>
+
+                    <div class="method-box">
+                        <h3>4. Fase de Retiro</h3>
+                        <p>Durante la jubilación, la prioridad de retiro es:</p>
+                        <ol>
+                            <li>Se agota primero el <strong>Capital de Caja</strong>.</li>
+                            <li>Una vez en cero, se comienza a retirar de la <strong>Reserva de Jubilación</strong>.</li>
+                            <li>Si ambos llegan a cero, se registra un <strong>Déficit</strong> de fondos.</li>
+                        </ol>
+                    </div>
+
+                    <div class="method-box full-width">
+                        <h3>5. Ingreso Mensual Perpetuo</h3>
+                        <p>Calcula cuánto se puede retirar cada mes sin que el capital total baje nunca (ajustado por inflación):</p>
+                        <code class="formula">Ingreso = Capital * [((1 + tasa_reserva)^30 - 1) - ((1 + tasa_inflacion)^30 - 1)]</code>
+                        <p class="extra">Básicamente: retiras solo los intereses reales que sobran después de compensar la pérdida de valor por inflación.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
